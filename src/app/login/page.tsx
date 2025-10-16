@@ -16,7 +16,7 @@ export default function LoginPage() {
           <div className="mb-4 flex items-center justify-center">
              <ShieldCheck className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">PAC-Management Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">NOVAO Login</CardTitle>
           <CardDescription>
             Please sign in with your admin credentials.
           </CardDescription>

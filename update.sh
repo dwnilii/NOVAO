@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# PAC-Management Safe Update Script
+# NOVAO Safe Update Script
 # This script updates the application from Git without overwriting user data.
 
 # --- Configuration ---
 INSTALL_DIR=$(pwd) # Assumes the script is run from the project root
-PM2_APP_NAME="pac-management"
+PM2_APP_NAME="novao"
 
 # --- Colors for output ---
 C_RESET='\033[0m'

@@ -1,4 +1,4 @@
-# PAC-Management Panel
+# NOVAO Panel
 
 [برای مشاهده نسخه فارسی اینجا کلیک کنید (Click here for Persian version)](./README-fa.md)
 
@@ -49,7 +49,7 @@ We recommend using PM2 to keep the application running continuously.
 
 Start the application
 ```
-pm2 start npm --name "pac-management" -- start
+pm2 start npm --name "novao" -- start
 ```
 Save the process list to have it restart on server reboot
 ```
@@ -69,4 +69,3 @@ Your panel should now be running on `http://<your_server_ip>:3000`.
 <img width="1324" height="836" alt="Screenshot 2025-09-19 180204" src="https://github.com/user-attachments/assets/f3379a6f-e5fa-428b-9548-73a86ac78cde" />
 <img width="1499" height="837" alt="Screenshot 2025-09-19 180939" src="https://github.com/user-attachments/assets/3d68a3f1-8f3f-4ed9-b92e-6443d6e065ea" />
 <img width="563" height="794" alt="Screenshot 2025-09-19 180228" src="https://github.com/user-attachments/assets/c141d925-2204-4191-9f88-fa2bd8ef0960" />
-

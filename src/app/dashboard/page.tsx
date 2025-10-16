@@ -115,7 +115,7 @@ export default function Dashboard() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Welcome to PAC-Management</CardTitle>
+            <CardTitle>Welcome to NOVAO</CardTitle>
             <CardDescription>A centralized panel for generating and managing Proxy Auto-Config (PAC) files.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

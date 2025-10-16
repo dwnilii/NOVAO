@@ -79,7 +79,7 @@ export function SetupForm() {
                         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                             <ShieldAlert className="h-10 w-10 text-primary" />
                         </div>
-                        <CardTitle className="text-2xl">PAC-Management Setup</CardTitle>
+                        <CardTitle className="text-2xl">NOVAO Setup</CardTitle>
                         <CardDescription className="animate-in fade-in slide-in-from-top-2 duration-500">
                             Welcome! Please create your admin credentials to secure the panel.
                         </CardDescription>

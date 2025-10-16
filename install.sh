@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# PAC-Management Installer Script
-# This script automates the installation of the PAC-Management panel on a Debian/Ubuntu server.
+# NOVAO Installer Script
+# This script automates the installation of the NOVAO panel on a Debian/Ubuntu server.
 
 # --- Configuration ---
 REPO_URL="https://github.com/dwnilii/PAC-Management.git"
-INSTALL_DIR="/opt/PAC-Management" # Changed to /opt/
-PM2_APP_NAME="pac-management"
+INSTALL_DIR="/opt/NOVAO" # Changed to /opt/
+PM2_APP_NAME="novao"
 NODE_VERSION="18" # Required Node.js version
 PAC_DIR="/var/www/html/pac" # Base directory for PAC files
 
@@ -71,7 +71,7 @@ if [ -d "$INSTALL_DIR" ]; then
     cd "$INSTALL_DIR"
     git pull origin main || print_warning "Could not pull latest changes."
 else
-    print_info "Cloning the PAC-Management repository into $INSTALL_DIR..."
+    print_info "Cloning the NOVAO repository into $INSTALL_DIR..."
     git clone "$REPO_URL" "$INSTALL_DIR" || print_error "Failed to clone repository."
 fi
 
@@ -115,12 +115,12 @@ env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u www
 pm2 save || print_warning "Could not save PM2 process list."
 
 # 12. Create the management UI script in the installation directory
-UI_SCRIPT_PATH="$INSTALL_DIR/pac-ui.sh"
+UI_SCRIPT_PATH="$INSTALL_DIR/novao-ui.sh"
 print_info "Creating management UI script ($UI_SCRIPT_PATH)..."
 cat > "$UI_SCRIPT_PATH" << 'EOF'
 #!/bin/bash
 
-# PAC-Management UI Script
+# NOVAO UI Script
 
 # --- Colors ---
 C_RESET='\033[0m'
@@ -130,8 +130,8 @@ C_YELLOW='\033[0;33m'
 C_BLUE='\033[0;34m'
 
 # --- App Config ---
-PM2_APP_NAME="pac-management"
-INSTALL_DIR="/opt/PAC-Management" # Corrected install dir
+PM2_APP_NAME="novao"
+INSTALL_DIR="/opt/NOVAO" # Corrected install dir
 REPO_URL="https://github.com/dwnilii/PAC-Management.git"
 
 # --- Helper Functions ---
@@ -168,10 +168,10 @@ uninstall_app() {
         print_info "Removing project directory: $INSTALL_DIR"
         rm -rf "$INSTALL_DIR"
         print_info "Removing Nginx config..."
-        rm -f /etc/nginx/sites-enabled/pac-management
-        rm -f /etc/nginx/sites-available/pac-management
+        rm -f /etc/nginx/sites-enabled/novao
+        rm -f /etc/nginx/sites-available/novao
         systemctl reload nginx
-        print_success "PAC-Management has been uninstalled."
+        print_success "NOVAO has been uninstalled."
     else
         echo "Uninstall cancelled."
     fi
@@ -184,7 +184,7 @@ configure_nginx() {
         apt-get update && apt-get install -y nginx || { print_error "Failed to install Nginx."; return; }
     fi
     
-    NGINX_CONF_PATH="/etc/nginx/sites-available/pac-management"
+    NGINX_CONF_PATH="/etc/nginx/sites-available/novao"
     print_info "Configuring Nginx to serve PAC files..."
     
     cat > "$NGINX_CONF_PATH" <<EON
@@ -249,7 +249,7 @@ show_logs() {
 
 # --- Main Menu Display ---
 while true; do
-    echo -e "\n${C_BLUE}--- PAC-Management Control Panel ---${C_RESET}"
+    echo -e "\n${C_BLUE}--- NOVAO Control Panel ---${C_RESET}"
     echo "1) Install / Re-install"
     echo "2) Uninstall"
     echo "3) Nginx Auto-Config"
@@ -278,7 +278,7 @@ EOF
 chmod +x "$UI_SCRIPT_PATH" || print_warning "Could not make $UI_SCRIPT_PATH executable."
 
 # --- Final Instructions ---
-print_success "PAC-Management has been successfully installed!"
+print_success "NOVAO has been successfully installed!"
 print_info "The application is running under PM2 with the name '$PM2_APP_NAME'."
 print_info "Your panel should be accessible at http://<your_server_ip>"
 print_warning "IMPORTANT: Please edit the '.env' file in '$INSTALL_DIR' to set a secure admin username and password."

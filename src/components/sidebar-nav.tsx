@@ -50,7 +50,7 @@ export function SidebarNav() {
       <SidebarHeader>
         <div className="flex items-center gap-2 h-16 w-full px-4">
             <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
-            <span className="whitespace-nowrap text-lg font-semibold">PAC-Management</span>
+            <span className="whitespace-nowrap text-lg font-semibold">NOVAO</span>
         </div>
       </SidebarHeader>
       <SidebarGroup className="flex-1">

@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'PAC-Management',
-  description: 'PAC-Management Dashboard',
+  title: 'NOVAO',
+  description: 'NOVAO Dashboard',
 };
 
 export default function RootLayout({
