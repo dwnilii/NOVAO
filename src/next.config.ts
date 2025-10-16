@@ -31,13 +31,6 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    // This is to prevent 'fs' module not found error in client-side bundling
-    if (!isServer) {
-        config.resolve.fallback = {
-            ...config.resolve.fallback,
-            fs: false,
-        };
-    }
     // This is to make sqlite3 work with Next.js
     config.externals.push('sqlite3');
     return config;

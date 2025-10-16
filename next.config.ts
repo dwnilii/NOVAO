@@ -30,10 +30,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  env: {
-    // This is no longer needed as we use the /api/verify-pin route
-    // NEXT_PUBLIC_ADMIN_PIN: process.env.NEXT_PUBLIC_ADMIN_PIN,
-  },
   webpack: (config, { isServer }) => {
     // This is to make sqlite3 work with Next.js
     config.externals.push('sqlite3');
