@@ -9,29 +9,36 @@ import type { Order } from '@/lib/types';
 import { LanguageContext } from '@/context/language-context';
 import { translations } from '@/lib/translations';
 import { useAuth } from '@/hooks/use-auth';
+import { getOrdersByUserId } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
-interface NotificationBellProps {
-    allOrders: Order[];
-    isLoading: boolean;
-}
-
-export function NotificationBell({ allOrders, isLoading }: NotificationBellProps) {
+export function NotificationBell() {
   const { language } = useContext(LanguageContext);
   const t = translations[language].orderHistory;
   const { user } = useAuth();
+  const { toast } = useToast();
   
-  const [hasPendingOrders, setHasPendingOrders] = useState(false);
-
-  const userOrders = useMemo(() => {
-    if (!user) return [];
-    return allOrders.filter(order => order.user_id === user.id);
-  }, [allOrders, user]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if there are any orders with 'pending' status
-    const pending = userOrders.some(order => order.status === 'pending');
-    setHasPendingOrders(pending);
-  }, [userOrders]);
+    if (user?.id) {
+      setIsLoading(true);
+      getOrdersByUserId(user.id)
+        .then(setOrders)
+        .catch(err => {
+          console.error("Error fetching orders for notification bell:", err);
+          toast({ title: "Error", description: "Could not load notifications.", variant: "destructive" });
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+        setIsLoading(false);
+    }
+  }, [user, toast]);
+
+  const hasPendingOrders = useMemo(() => {
+    return orders.some(order => order.status === 'pending');
+  }, [orders]);
   
   const getStatusVariant = (status: Order['status']) => {
     switch (status) {
@@ -65,8 +72,8 @@ export function NotificationBell({ allOrders, isLoading }: NotificationBellProps
             <div className="flex justify-center items-center h-24">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : userOrders.length > 0 ? (
-            userOrders.slice(0, 5).map(order => (
+          ) : orders.length > 0 ? (
+            orders.slice(0, 5).map(order => (
               <div
                 key={order.id}
                 className="mb-2 grid grid-cols-[25px_1fr] items-start last:mb-0 last:pb-0"

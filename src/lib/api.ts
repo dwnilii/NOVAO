@@ -151,11 +151,17 @@ export async function getOrders(): Promise<Order[]> {
   return orders.map(o => ({...o, items: JSON.parse(o.items as unknown as string || '[]')}));
 }
 
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+  const db = await getDb();
+  const orders = await db.all<Order[]>("SELECT * FROM orders WHERE user_id = ? ORDER BY date DESC", userId);
+  return orders.map(o => ({...o, items: JSON.parse(o.items as unknown as string || '[]')}));
+}
+
+
 export async function addOrder(order: Omit<Order, 'id'>): Promise<Order> {
     const db = await getDb();
     const id = `ord_${Date.now()}`;
     
-    // Sanitize prices before inserting into the database
     const sanitizedTotal = parseFloat(String(order.totalAmount).replace(/[^0-9.]/g, ''));
     const sanitizedItems = order.items.map(item => ({
         ...item,
@@ -245,8 +251,6 @@ export async function deleteFeature(id: string): Promise<{ success: boolean }> {
 
 // --- API Function for Fetching Live Data from 3x-ui Panel (used by User Dashboard) ---
 export async function getLiveUserData(userIdentifier: string): Promise<Partial<User> | null> {
-  // This function is now a placeholder as the live API connection is removed.
-  // It will return null, and the dashboard will rely on DB data.
   return null;
 }
 

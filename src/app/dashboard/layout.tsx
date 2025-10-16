@@ -10,48 +10,15 @@ import { useRouter } from "next/navigation";
 import { LanguageToggle } from "@/components/language-toggle";
 import { LanguageProvider } from "@/context/language-context";
 import { NotificationBell } from "@/components/notification-bell";
-import { getOrders } from "@/lib/api";
-import type { Order } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
-
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
-  
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (user?.id) {
-        setIsLoading(true);
-        getOrders()
-            .then(allOrders => {
-                // Set ALL orders here. Filtering will happen in child components.
-                setOrders(allOrders);
-            })
-            .catch(err => {
-                console.error("Error fetching initial orders:", err);
-                toast({ title: "Error", description: "Could not load order data.", variant: "destructive" });
-            })
-            .finally(() => setIsLoading(false));
-    }
-  }, [user, toast]);
-
 
   const handleLogout = () => {
     logout();
     router.push('/user-login');
   };
-
-  const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      // @ts-ignore
-      return React.cloneElement(child, { orders, setOrders, isOrdersLoading: isLoading });
-    }
-    return child;
-  });
 
   return (
     <LanguageProvider>
@@ -67,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
 
             <div className="flex items-center gap-2">
-               <NotificationBell allOrders={orders} isLoading={isLoading} />
+               <NotificationBell />
                <LanguageToggle />
               <Button 
                 variant="destructive" 
@@ -81,7 +48,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-          {childrenWithProps}
+          {children}
         </main>
       </div>
     </LanguageProvider>

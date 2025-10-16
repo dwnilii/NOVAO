@@ -18,27 +18,36 @@ import { CheckoutDialog } from "@/components/checkout-dialog";
 import type { CartItem, Order, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { OrderHistoryDialog } from "@/components/order-history-dialog";
-import { addOrder } from "@/lib/api";
+import { addOrder, getOrdersByUserId } from "@/lib/api";
 import { LanguageContext } from "@/context/language-context";
 import { translations } from "@/lib/translations";
 
-// This component receives orders and setOrders from its parent layout
-export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }: { orders: Order[], setOrders: React.Dispatch<React.SetStateAction<Order[]>>, isOrdersLoading: boolean }) {
+export default function UserDashboardPage() {
   const { user: authUser, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const { language } = useContext(LanguageContext);
   const t = translations[language];
 
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isOrdersLoading, setIsOrdersLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isStoreOpen, setIsStoreOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const userOrders = useMemo(() => {
-    if (!authUser || !orders) return [];
-    return orders.filter(order => order.user_id === authUser.id);
-  }, [orders, authUser]);
+  useEffect(() => {
+    if (authUser?.id) {
+      setIsOrdersLoading(true);
+      getOrdersByUserId(authUser.id)
+        .then(setOrders)
+        .catch(err => {
+          console.error("Error fetching user orders:", err);
+          toast({ title: "Error", description: "Could not load order data.", variant: "destructive" });
+        })
+        .finally(() => setIsOrdersLoading(false));
+    }
+  }, [authUser, toast]);
   
   useEffect(() => {
     if (!authLoading && !authUser) {
@@ -47,7 +56,6 @@ export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }
   }, [authUser, authLoading, router]);
 
   const handleAddToCart = (item: CartItem) => {
-    // For plans, only one can be bought for self
     if (item.type === 'plan' && !item.recipientUsername && cart.some(cartItem => cartItem.type === 'plan' && !cartItem.recipientUsername)) {
       toast({
         title: t.toast.planInCart.title,
@@ -84,7 +92,6 @@ export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }
   const handleOrderSubmit = async (orderData: Omit<Order, 'id'>) => {
     try {
         const newOrder = await addOrder(orderData);
-        // Update the global orders state passed from the layout
         setOrders(prev => [newOrder, ...prev]);
         toast({
             title: t.toast.orderSubmitted.title,
@@ -211,7 +218,7 @@ export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }
                     </DialogContent>
                 </Dialog>
                 
-                <OrderHistoryDialog userOrders={userOrders}>
+                <OrderHistoryDialog userOrders={orders}>
                     <Button variant="ghost" className="w-full sm:w-auto">
                         <History className="mr-2 h-4 w-4" />
                         {t.buttons.myOrders}
