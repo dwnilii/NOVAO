@@ -11,8 +11,9 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
   return (
     <Card
       className={cn(
-        "relative w-full max-w-sm shrink-0 snap-center overflow-hidden rounded-xl aspect-[1.586] text-white", // Aspect ratio for credit card
-        "bg-gradient-to-br from-neutral-800 to-neutral-900 transition-all duration-300 ease-in-out",
+        "relative w-full max-w-sm shrink-0 snap-center overflow-hidden rounded-xl aspect-[1.586] text-white transition-all duration-300 ease-in-out",
+        "bg-gradient-to-br from-neutral-700 to-neutral-900 shadow-lg shadow-black/30", // Added shadow and adjusted gradient
+        "ring-1 ring-inset ring-white/10", // Added inner ring for embossed effect
         !!plan.popular && "border-2 border-primary shadow-lg shadow-primary/20"
       )}
     >
