@@ -56,14 +56,6 @@ export default function UserDashboardPage() {
   }, [authUser, authLoading, router]);
 
   const handleAddToCart = (item: CartItem) => {
-    if (item.type === 'plan' && !item.recipientUsername && cart.some(cartItem => cartItem.type === 'plan' && !cartItem.recipientUsername)) {
-      toast({
-        title: t.toast.planInCart.title,
-        description: t.toast.planInCart.description,
-        variant: 'destructive',
-      });
-      return;
-    }
     setCart(prevCart => [...prevCart, item]);
     toast({
         title: t.toast.addedToCart.title,
@@ -72,7 +64,15 @@ export default function UserDashboardPage() {
   };
 
   const handleRemoveFromCart = (itemId: string) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== itemId));
+    setCart(prevCart => {
+        const itemIndex = prevCart.findIndex(item => item.id === itemId);
+        if (itemIndex > -1) {
+            const newCart = [...prevCart];
+            newCart.splice(itemIndex, 1);
+            return newCart;
+        }
+        return prevCart;
+    });
   };
 
   const handleProceedToCheckout = () => {

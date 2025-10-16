@@ -40,16 +40,10 @@ export type PricingPlan = {
   sortOrder: number;
 };
 
-export type HeroSectionContent = {
-  title: string;
-  subtitle: string;
-  buttonText: string;
-};
-
 // A CartItem now has its own unique ID, which might be different from the product's ID
 // especially in the case of gifts, to allow multiple gifts of the same product.
 export type CartItem = Omit<PricingPlan, 'id'> & { 
-  id: string; // Unique identifier for this cart instance (e.g., 'plan_123_for_testuser')
+  id: string; // Unique identifier for this cart instance (e.g., 'plan_123_for_testuser_timestamp')
   productId: string; // The original ID of the plan or pack
   type: 'plan' | 'traffic';
   recipientUsername?: string; // Username of the person this item is for

@@ -103,17 +103,16 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
 
   const currentUserPlan = user ? plans.find(p => p.title === user.planTitle) : null;
   
-  // This function now generates a unique ID for each cart item
-  // For gifts, it appends the recipient's username to ensure uniqueness
+  // This function now generates a unique ID for each cart item instance
   const generateCartItemId = (item: PricingPlan, recipientUsername?: string) => {
-    return recipientUsername ? `${item.id}_for_${recipientUsername}` : item.id!;
+    const randomSuffix = Math.random().toString(36).substr(2, 5);
+    const timeSuffix = Date.now().toString(36);
+    const baseId = recipientUsername ? `${item.id}_for_${recipientUsername}` : item.id;
+    return `${baseId}_${timeSuffix}_${randomSuffix}`;
   };
 
-  const isItemInCart = (itemId: string) => !!cart.find(item => item.id === itemId);
-  
   const handleAddToCartForSelf = (item: PricingPlan, type: 'plan' | 'traffic') => {
       const cartItemId = generateCartItemId(item);
-      if (isItemInCart(cartItemId)) return; // Already in cart for self
       onAddToCart({ ...item, type, id: cartItemId, productId: item.id });
   };
   
@@ -126,16 +125,7 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
         });
         return;
     }
-    // Generate a unique ID for this specific gift instance
     const cartItemId = generateCartItemId(item, username);
-    if (isItemInCart(cartItemId)) {
-        toast({
-            title: "Gift Already in Cart",
-            description: `You already have a gift of '${item.title}' in your cart for ${username}.`,
-            variant: 'destructive'
-        });
-        return;
-    }
     onAddToCart({ ...item, type, recipientUsername: username, id: cartItemId, productId: item.id });
   };
 
@@ -170,8 +160,6 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
           </CardHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {plans.map((plan) => {
-              const selfCartItemId = generateCartItemId(plan);
-              const inCartForSelf = isItemInCart(selfCartItemId);
               const isCurrent = plan.id === currentUserPlan?.id;
 
               return (
@@ -190,12 +178,12 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
                   <div className="flex gap-2 mt-4">
                     <Button
                       onClick={() => handleAddToCartForSelf(plan, 'plan')}
-                      disabled={isCurrent || inCartForSelf}
+                      disabled={isCurrent}
                       variant={isCurrent ? 'secondary' : 'default'}
                       size="sm"
                       className="w-full"
                     >
-                      {isCurrent ? t.buttons.currentPlan : inCartForSelf ? <><Check className="mr-2 h-4 w-4" /> {t.buttons.addedToCart}</> : t.buttons.addToCart}
+                      {isCurrent ? t.buttons.currentPlan : t.buttons.addToCart}
                     </Button>
                     <GiftDialog onConfirm={(username) => handleGiftConfirm(plan, 'plan', username)}>
                       <Button variant="secondary" size="sm" className='px-3'>
@@ -218,8 +206,6 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
             </CardHeader>
             <div className="space-y-3">
               {trafficPacks.map((pack) => {
-                const selfCartItemId = generateCartItemId(pack);
-                const inCartForSelf = isItemInCart(selfCartItemId);
                 return (
                   <div key={pack.id} className="flex items-center justify-between rounded-lg border bg-muted/30 p-3 transition-all hover:shadow-md">
                     <div className="flex items-center gap-3">
@@ -234,9 +220,8 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
                         size="sm"
                         onClick={() => handleAddToCartForSelf(pack, 'traffic')}
                         variant="secondary"
-                        disabled={inCartForSelf}
                       >
-                        {inCartForSelf ? <><Check className="mr-2 h-4 w-4" /> {t.buttons.added}</> : `${t.buttons.add} - ${getDisplayPrice(pack.price)}`}
+                        {`${t.buttons.add} - ${getDisplayPrice(pack.price)}`}
                       </Button>
                       <GiftDialog onConfirm={(username) => handleGiftConfirm(pack, 'traffic', username)}>
                         <Button variant="secondary" size="sm" className='px-3'>
