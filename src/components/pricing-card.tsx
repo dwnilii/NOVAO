@@ -29,7 +29,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
           )}
         >
           {!!plan.popular && (
-            <div className="absolute top-3 right-3 bg-primary text-primary-foreground py-1 px-2.5 text-xs font-bold text-center rounded-full z-10 shadow-lg">
+            <div className="absolute top-4 right-4 bg-primary text-primary-foreground py-0.5 px-2 text-[10px] font-bold text-center rounded-full z-10 shadow-lg">
               POPULAR
             </div>
           )}
