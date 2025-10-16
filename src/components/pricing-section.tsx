@@ -63,8 +63,6 @@ export function PricingSection() {
                 </div>
                  <div className="flex justify-center gap-8">
                    <PricingCardSkeleton />
-                   <PricingCardSkeleton />
-                   <PricingCardSkeleton />
                 </div>
             </div>
         </section>
@@ -89,17 +87,17 @@ export function PricingSection() {
             align: "start",
             loop: true,
           }}
-          className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-6xl mx-auto"
+          className="w-full max-w-md mx-auto"
         >
           <CarouselContent>
             {plans.map((plan) => (
-              <CarouselItem key={`plan-${plan.id}`} className="md:basis-1/2 lg:basis-1/3 flex justify-center">
+              <CarouselItem key={`plan-${plan.id}`} className="flex justify-center">
                 <PricingCard plan={plan} />
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="hidden sm:inline-flex" />
+          <CarouselNext className="hidden sm:inline-flex" />
         </Carousel>
       </div>
     </section>
