@@ -31,10 +31,10 @@ export function PricingCard({ plan }: PricingCardProps) {
       className={cn(
         "relative w-full max-w-sm shrink-0 snap-center overflow-hidden rounded-xl aspect-[1.586] text-white", // Aspect ratio for credit card
         "bg-gradient-to-br from-neutral-800 to-neutral-900 transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-primary/20",
-        plan.popular && "border-2 border-primary shadow-lg shadow-primary/20"
+        !!plan.popular && "border-2 border-primary shadow-lg shadow-primary/20"
       )}
     >
-        {plan.popular && (
+        {!!plan.popular && (
             <div className="absolute top-3 right-3 bg-primary text-primary-foreground py-1 px-2.5 text-xs font-bold text-center rounded-full z-10 shadow-lg">
                 POPULAR
             </div>
@@ -69,7 +69,7 @@ export function PricingCard({ plan }: PricingCardProps) {
                      <span className="ml-1 text-sm text-white/60">{plan.period}</span>
                 </div>
             </div>
-            <Button asChild size="lg" className="w-full" variant={plan.popular ? 'default' : 'outline'}>
+            <Button asChild size="lg" className="w-full" variant={!!plan.popular ? 'default' : 'outline'}>
                 <Link href="/login">Choose Plan</Link>
             </Button>
         </div>
