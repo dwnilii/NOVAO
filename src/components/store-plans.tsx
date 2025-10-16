@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Zap, Check, Loader2, Gift } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { PricingPlan, CartItem } from '@/lib/types';
 import { ScrollArea } from './ui/scroll-area';
 import { LanguageContext } from '@/context/language-context';
@@ -102,7 +101,7 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
   }, [language]);
 
 
-  const currentUserPlan = user ? plans.find(p => p.data === user.total) : null;
+  const currentUserPlan = user ? plans.find(p => p.title === user.planTitle) : null;
   
   // This function now generates a unique ID for each cart item
   // For gifts, it appends the recipient's username to ensure uniqueness
@@ -162,99 +161,95 @@ export function StorePlans({ onAddToCart, cart }: StorePlansProps) {
 
   return (
     <ScrollArea className="flex-1 -mx-6">
-      <div className="grid grid-cols-1 gap-8 px-6">
-          <Tabs defaultValue="subscriptions" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="subscriptions">{t.tabs.subscriptions}</TabsTrigger>
-                  <TabsTrigger value="traffic">{t.tabs.traffic}</TabsTrigger>
-              </TabsList>
-              <TabsContent value="subscriptions" className="mt-4">
-                  <Card className="border-none shadow-none bg-transparent">
-                  <CardHeader className="px-1">
-                      <CardTitle>{t.subscriptions.title}</CardTitle>
-                      <CardDescription>{t.subscriptions.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 px-1">
-                      {plans.map((plan, index) => {
-                        const selfCartItemId = generateCartItemId(plan);
-                        const inCartForSelf = isItemInCart(selfCartItemId);
-                        const isCurrent = plan.id === currentUserPlan?.id;
-                        
-                        return (
-                          <div key={index} className="flex flex-col space-y-3 rounded-lg border bg-muted/30 p-4 transition-all hover:shadow-md">
-                              <div className="flex items-start justify-between">
-                                  <div className="space-y-1">
-                                      <h4 className="font-semibold">{plan.title}</h4>
-                                      <p className="text-xs text-muted-foreground">
-                                          {plan.duration} / {plan.data} / {plan.devices}
-                                      </p>
-                                  </div>
-                                  <p className="font-bold text-lg">{getDisplayPrice(plan.price)}</p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                    onClick={() => handleAddToCartForSelf(plan, 'plan')}
-                                    disabled={isCurrent || inCartForSelf}
-                                    variant={plan.popular ? 'default' : 'secondary'}
-                                    size="sm"
-                                    className="w-full"
-                                >
-                                    {isCurrent ? t.buttons.currentPlan : inCartForSelf ? <><Check className="mr-2 h-4 w-4" /> {t.buttons.addedToCart}</> : t.buttons.addToCart}
-                                </Button>
-                                <GiftDialog onConfirm={(username) => handleGiftConfirm(plan, 'plan', username)}>
-                                     <Button variant="secondary" size="sm">
-                                        <Gift className="h-4 w-4" />
-                                    </Button>
-                                </GiftDialog>
-                              </div>
-                          </div>
-                        )
-                      })}
-                  </CardContent>
-                  </Card>
-              </TabsContent>
-              <TabsContent value="traffic" className="mt-4">
-                  <Card className="border-none shadow-none bg-transparent">
-                  <CardHeader className="px-1">
-                      <CardTitle>{t.traffic.title}</CardTitle>
-                      <CardDescription>{t.traffic.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="w-full space-y-3 px-1">
-                      {trafficPacks.map((pack) => {
-                        const selfCartItemId = generateCartItemId(pack);
-                        const inCartForSelf = isItemInCart(selfCartItemId);
-                        return (
-                          <div key={pack.id} className="flex items-center justify-between rounded-lg border bg-muted/30 p-3 transition-all hover:shadow-md">
-                              <div className="flex items-center gap-3">
-                              <Zap className="h-5 w-5 text-primary/80" />
-                              <div className="space-y-1">
-                                  <span className="font-medium">{pack.data}</span>
-                                  <p className="text-xs text-muted-foreground">{pack.duration}</p>
-                              </div>
-                            
-                              </div>
-                               <div className="flex items-center gap-2">
-                                 <Button 
-                                      size="sm" 
-                                      onClick={() => handleAddToCartForSelf(pack, 'traffic')} 
-                                      variant="secondary"
-                                      disabled={inCartForSelf}
-                                  >
-                                    {inCartForSelf ? <><Check className="mr-2 h-4 w-4" /> {t.buttons.added}</> : `${t.buttons.add} - ${getDisplayPrice(pack.price)}`}
-                                  </Button>
-                                   <GiftDialog onConfirm={(username) => handleGiftConfirm(pack, 'traffic', username)}>
-                                     <Button variant="secondary" size="sm">
-                                        <Gift className="h-4 w-4" />
-                                    </Button>
-                                </GiftDialog>
-                               </div>
-                          </div>
-                        )
-                      })}
-                  </CardContent>
-                  </Card>
-              </TabsContent>
-          </Tabs>
+      <div className="px-6 py-2 space-y-8">
+        {/* Subscription Plans Section */}
+        <div>
+          <CardHeader className="px-1 -mx-1">
+            <CardTitle>{t.subscriptions.title}</CardTitle>
+            <CardDescription>{t.subscriptions.description}</CardDescription>
+          </CardHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {plans.map((plan) => {
+              const selfCartItemId = generateCartItemId(plan);
+              const inCartForSelf = isItemInCart(selfCartItemId);
+              const isCurrent = plan.id === currentUserPlan?.id;
+
+              return (
+                <div key={plan.id} className="flex flex-col rounded-lg bg-gradient-to-br from-muted/50 to-muted/20 p-4 border border-border/50 transition-all hover:shadow-lg hover:border-primary/50">
+                  <div className="flex-1 space-y-4">
+                    <div className="flex justify-between items-start">
+                        <h4 className="font-semibold text-lg">{plan.title}</h4>
+                         {plan.popular && <div className="text-xs bg-primary text-primary-foreground font-bold px-2 py-0.5 rounded-full">POPULAR</div>}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {plan.duration} / {plan.data} / {plan.devices}
+                    </p>
+                    <p className="font-bold text-2xl">{getDisplayPrice(plan.price)}</p>
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => handleAddToCartForSelf(plan, 'plan')}
+                      disabled={isCurrent || inCartForSelf}
+                      variant={isCurrent ? 'secondary' : 'default'}
+                      size="sm"
+                      className="w-full"
+                    >
+                      {isCurrent ? t.buttons.currentPlan : inCartForSelf ? <><Check className="mr-2 h-4 w-4" /> {t.buttons.addedToCart}</> : t.buttons.addToCart}
+                    </Button>
+                    <GiftDialog onConfirm={(username) => handleGiftConfirm(plan, 'plan', username)}>
+                      <Button variant="secondary" size="sm" className='px-3'>
+                        <Gift className="h-4 w-4" />
+                      </Button>
+                    </GiftDialog>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Extra Traffic Section */}
+        {trafficPacks.length > 0 && (
+          <div>
+            <CardHeader className="px-1 -mx-1">
+              <CardTitle>{t.traffic.title}</CardTitle>
+              <CardDescription>{t.traffic.description}</CardDescription>
+            </CardHeader>
+            <div className="space-y-3">
+              {trafficPacks.map((pack) => {
+                const selfCartItemId = generateCartItemId(pack);
+                const inCartForSelf = isItemInCart(selfCartItemId);
+                return (
+                  <div key={pack.id} className="flex items-center justify-between rounded-lg border bg-muted/30 p-3 transition-all hover:shadow-md">
+                    <div className="flex items-center gap-3">
+                      <Zap className="h-5 w-5 text-primary/80" />
+                      <div>
+                        <span className="font-medium">{pack.data}</span>
+                        <p className="text-xs text-muted-foreground">{pack.duration}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToCartForSelf(pack, 'traffic')}
+                        variant="secondary"
+                        disabled={inCartForSelf}
+                      >
+                        {inCartForSelf ? <><Check className="mr-2 h-4 w-4" /> {t.buttons.added}</> : `${t.buttons.add} - ${getDisplayPrice(pack.price)}`}
+                      </Button>
+                      <GiftDialog onConfirm={(username) => handleGiftConfirm(pack, 'traffic', username)}>
+                        <Button variant="secondary" size="sm" className='px-3'>
+                          <Gift className="h-4 w-4" />
+                        </Button>
+                      </GiftDialog>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </ScrollArea>
   );
