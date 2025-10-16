@@ -28,12 +28,6 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
             !!plan.popular && "border-2 border-primary shadow-lg shadow-primary/20"
           )}
         >
-          {!!plan.popular && (
-            <div className="absolute top-4 right-4 bg-primary text-primary-foreground py-0.5 px-2 text-[10px] font-bold text-center rounded-full z-10 shadow-lg">
-              POPULAR
-            </div>
-          )}
-
           <CardContent className="relative flex flex-col justify-between h-full p-5">
             
             <div className="z-10 flex justify-between items-start">
@@ -50,6 +44,9 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
             <div className="z-10 space-y-3">
                  <div className="flex justify-between items-end">
                     <div className="space-y-1">
+                        {!!plan.popular && (
+                            <p className="text-[10px] font-bold text-primary tracking-wider">POPULAR</p>
+                        )}
                         <p className="text-xs font-light text-white/60">Plan</p>
                         <p className="font-medium tracking-wide">{plan.title}</p>
                         <p className="text-xs font-light text-white/70">{plan.duration} / {plan.devices}</p>
