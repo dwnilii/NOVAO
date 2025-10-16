@@ -1,5 +1,4 @@
 import type {Config} from 'tailwindcss';
-import { fontFamily } from 'tailwindcss/defaultTheme';
 
 export default {
   darkMode: ['class'],
@@ -11,9 +10,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', ...fontFamily.sans],
-        'sans-fa': ['IRANSans', ...fontFamily.sans],
+        body: ['var(--font-inter)', 'sans-serif'],
+        persian: ['var(--font-noto-sans-arabic)', 'sans-serif'],
         code: ['monospace'],
+      },
+      backdropSaturate: {
+        125: '1.25',
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -89,10 +91,15 @@ export default {
             height: '0',
           },
         },
+        'bubble': {
+          '0%': { transform: 'translateY(0)', opacity: '0.8' },
+          '100%': { transform: 'translateY(-100vh)', opacity: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'bubble': 'bubble 25s linear infinite',
       },
     },
   },

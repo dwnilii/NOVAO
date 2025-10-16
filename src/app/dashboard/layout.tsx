@@ -1,91 +1,89 @@
-
 'use client';
 
-import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/sidebar-nav';
-import { Breadcrumb } from '@/components/breadcrumb';
-import { useToast } from '@/hooks/use-toast';
+import type { ReactNode } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Zap, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { LanguageToggle } from "@/components/language-toggle";
+import { LanguageProvider } from "@/context/language-context";
+import { NotificationBell } from "@/components/notification-bell";
+import { getOrders } from "@/lib/api";
+import type { Order } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
-const DEFAULT_SESSION_TIMEOUT_MINUTES = 15;
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const timeoutId = useRef<NodeJS.Timeout | null>(null);
+  
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+        setIsLoading(true);
+        getOrders()
+            .then(allOrders => {
+                // Set ALL orders here. Filtering will happen in child components.
+                setOrders(allOrders);
+            })
+            .catch(err => {
+                console.error("Error fetching initial orders:", err);
+                toast({ title: "Error", description: "Could not load order data.", variant: "destructive" });
+            })
+            .finally(() => setIsLoading(false));
+    }
+  }, [user, toast]);
+
 
   const handleLogout = () => {
-    sessionStorage.removeItem('isLoggedIn');
-    if (timeoutId.current) {
-        clearTimeout(timeoutId.current);
-    }
-    toast({ title: "Logged Out", description: "You have been logged out." });
-    router.replace('/login');
+    logout();
+    router.push('/user-login');
   };
 
-  const resetTimeout = () => {
-    if (timeoutId.current) {
-      clearTimeout(timeoutId.current);
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      // @ts-ignore
+      return React.cloneElement(child, { orders, setOrders, isOrdersLoading: isLoading });
     }
-    const newTimeoutId = setTimeout(() => {
-      handleLogout();
-      toast({ variant: "default", title: "Session Expired", description: "You have been logged out due to inactivity." });
-    }, DEFAULT_SESSION_TIMEOUT_MINUTES * 60 * 1000);
-    timeoutId.current = newTimeoutId;
-  };
-  
-  useEffect(() => {
-    // Auth guard
-    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-    if (isLoggedIn !== 'true') {
-      router.replace('/login');
-      return; // Stop further execution in this effect
-    }
-
-    // Set up activity listeners
-    const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
-    
-    // Initial timeout setup
-    resetTimeout();
-    
-    events.forEach(event => window.addEventListener(event, resetTimeout));
-
-    // Cleanup function
-    return () => {
-      events.forEach(event => window.removeEventListener(event, resetTimeout));
-      if (timeoutId.current) {
-        clearTimeout(timeoutId.current);
-      }
-    };
-  }, [router]);
-
-  // Auth guard check. If not logged in, render nothing to prevent flash of content.
-  if (typeof window !== 'undefined' && sessionStorage.getItem('isLoggedIn') !== 'true') {
-    return null;
-  }
+    return child;
+  });
 
   return (
-    <SidebarProvider>
-        <Sidebar>
-          <SidebarNav />
-        </Sidebar>
-        <SidebarInset>
-          <header className="flex h-16 items-center gap-4 border-b bg-card/50 px-6 sticky top-0 z-10 backdrop-blur-sm">
-            <div className="flex items-center gap-4">
-              <Breadcrumb />
+    <LanguageProvider>
+      <div className="flex min-h-screen w-full flex-col">
+        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background/25 px-4 backdrop-blur-xl backdrop-saturate-125 md:px-6 z-10">
+          <nav className="flex w-full items-center justify-between">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 font-semibold"
+            >
+              <Zap className="h-6 w-6 text-primary" />
+              <span className="text-lg">Novao</span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+               <NotificationBell allOrders={orders} isLoading={isLoading} />
+               <LanguageToggle />
+              <Button 
+                variant="destructive" 
+                onClick={handleLogout}
+                className="bg-destructive/60 hover:bg-destructive/80 backdrop-blur-sm"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
             </div>
-            <div className="flex-1" />
-          </header>
-          <main className="flex-1 overflow-auto p-4 md:p-6">
-            {children}
-          </main>
-        </SidebarInset>
-    </SidebarProvider>
+          </nav>
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+          {childrenWithProps}
+        </main>
+      </div>
+    </LanguageProvider>
   );
 }

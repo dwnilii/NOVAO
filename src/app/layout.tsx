@@ -1,14 +1,29 @@
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { Noto_Sans_Arabic } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+import { BackgroundBubbles } from '@/components/background-bubbles';
+import { AuthProvider } from '@/hooks/use-auth';
+import { LanguageProvider } from '@/context/language-context';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'NOVAO',
-  description: 'NOVAO Dashboard',
+  title: 'Novao',
+  description: 'Novao - A Secure, Fast, and Reliable Private Service',
 };
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const notoSansArabic = Noto_Sans_Arabic({
+  subsets: ['arabic'],
+  display: 'swap',
+  variable: '--font-noto-sans-arabic',
+});
 
 export default function RootLayout({
   children,
@@ -16,12 +31,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <head>
-      </head>
-      <body className={inter.variable + " font-sans antialiased"}>
-        {children}
-        <Toaster />
+    <html lang="en" className={cn('dark', inter.variable, notoSansArabic.variable)}>
+      <head />
+      <body className="font-body font-persian antialiased">
+        <AuthProvider>
+          <LanguageProvider>
+            <BackgroundBubbles />
+            <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
+            <Toaster />
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );
