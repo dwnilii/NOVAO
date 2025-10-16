@@ -45,7 +45,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
                  <div className="flex justify-between items-end">
                     <div className="space-y-1">
                         {!!plan.popular && (
-                            <p className="text-[10px] font-bold text-primary tracking-wider">POPULAR</p>
+                          <p className="text-[10px] font-bold text-primary tracking-wider">POPULAR</p>
                         )}
                         <p className="text-xs font-light text-white/60">Plan</p>
                         <p className="font-medium tracking-wide">{plan.title}</p>
