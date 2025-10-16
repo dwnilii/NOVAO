@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,7 @@ export function AdminLoginForm({ className }: AdminLoginFormProps) {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifyingPin, setIsVerifyingPin] = useState(false);
+  const pinFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     // If the user is already logged in, redirect them.
@@ -57,6 +58,12 @@ export function AdminLoginForm({ className }: AdminLoginFormProps) {
       }
     }
   }, [user, loading, router]);
+  
+  useEffect(() => {
+    if (pin.length === 4 && !isVerifyingPin) {
+      pinFormRef.current?.requestSubmit();
+    }
+  }, [pin, isVerifyingPin]);
   
   const handlePinSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -160,7 +167,7 @@ export function AdminLoginForm({ className }: AdminLoginFormProps) {
                 <CardDescription>Please enter the 4-digit PIN to proceed.</CardDescription>
             </CardHeader>
             <CardContent>
-                <form className="space-y-4" onSubmit={handlePinSubmit}>
+                <form ref={pinFormRef} className="space-y-4" onSubmit={handlePinSubmit}>
                 <div className="space-y-2">
                     <Label htmlFor="pin">Security PIN</Label>
                     <PinInput length={4} onComplete={setPin} disabled={isVerifyingPin} />
