@@ -35,15 +35,8 @@ const nextConfig: NextConfig = {
     // NEXT_PUBLIC_ADMIN_PIN: process.env.NEXT_PUBLIC_ADMIN_PIN,
   },
   webpack: (config, { isServer }) => {
-    // This is to prevent 'fs' module not found error in client-side bundling
-    if (!isServer) {
-        config.resolve.fallback = {
-            ...config.resolve.fallback,
-            fs: false,
-        };
-    }
     // This is to make sqlite3 work with Next.js
-    config.externals.push('sqlite3', 'fs-extra');
+    config.externals.push('sqlite3');
     return config;
   }
 };

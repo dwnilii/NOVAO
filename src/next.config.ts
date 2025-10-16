@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
         };
     }
     // This is to make sqlite3 work with Next.js
-    config.externals.push('sqlite3', 'fs-extra');
+    config.externals.push('sqlite3');
     return config;
   }
 };

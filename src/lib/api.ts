@@ -6,9 +6,8 @@
  */
 import { getDb } from './db';
 import type { User, Order, PricingPlan, BackupFile, Feature, CartItem } from './types';
-import fs from 'fs-extra';
+import { promises as fs, statSync, existsSync } from 'fs';
 import path from 'path';
-import api from './axios-instance';
 
 const DB_PATH = process.env.DATABASE_PATH || './novao.db';
 const BACKUP_DIR = path.join(process.cwd(), 'backups');
@@ -246,32 +245,16 @@ export async function deleteFeature(id: string): Promise<{ success: boolean }> {
 
 // --- API Function for Fetching Live Data from 3x-ui Panel (used by User Dashboard) ---
 export async function getLiveUserData(userIdentifier: string): Promise<Partial<User> | null> {
-  if (!userIdentifier) return null;
-  try {
-    const response = await api.get(`/api/client/${userIdentifier}`);
-    if (response.data && response.data.success && response.data.obj) {
-      const panelData = response.data.obj;
-      const data: Partial<User> = {
-        usage: Math.round((panelData.up + panelData.down) / (1024 * 1024 * 1024)),
-        total: Math.round(panelData.total / (1024 * 1024 * 1024)),
-        sublink: panelData.subLink,
-        expiryDate: panelData.expiryTime > 0 ? new Date(panelData.expiryTime).toISOString().split('T')[0] : undefined,
-      };
-      return data;
-    }
-    console.warn(`No successful data returned for identifier ${userIdentifier} from panel.`);
-    return null;
-  } catch (error) {
-    console.error(`Failed to fetch live data for user with identifier ${userIdentifier}:`, error);
-    return null;
-  }
+  // This function is now a placeholder as the live API connection is removed.
+  // It will return null, and the dashboard will rely on DB data.
+  return null;
 }
 
 // --- Backup & Restore Management ---
 
 export async function createBackup(): Promise<{ success: boolean; message: string; filename?: string; }> {
   try {
-    await fs.ensureDir(BACKUP_DIR);
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `backup-${timestamp}.db`;
     const backupPath = path.join(BACKUP_DIR, filename);
@@ -285,12 +268,12 @@ export async function createBackup(): Promise<{ success: boolean; message: strin
 
 export async function getBackups(): Promise<BackupFile[]> {
   try {
-    await fs.ensureDir(BACKUP_DIR);
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
     const files = await fs.readdir(BACKUP_DIR);
     const backupFiles = files
       .filter(file => file.endsWith('.db'))
       .map(file => {
-        const stats = fs.statSync(path.join(BACKUP_DIR, file));
+        const stats = statSync(path.join(BACKUP_DIR, file));
         return {
           name: file,
           size: stats.size,
@@ -308,7 +291,7 @@ export async function getBackups(): Promise<BackupFile[]> {
 export async function restoreBackup(filename: string): Promise<{ success: boolean; message: string; }> {
   const backupPath = path.join(BACKUP_DIR, filename);
   try {
-    if (!(await fs.pathExists(backupPath))) {
+    if (!existsSync(backupPath)) {
       return { success: false, message: 'Backup file not found.' };
     }
     await fs.copyFile(backupPath, DB_PATH);

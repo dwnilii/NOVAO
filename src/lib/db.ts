@@ -6,7 +6,8 @@
  */
 import sqlite3 from 'sqlite3';
 import { open, type Database } from 'sqlite';
-import fs from 'fs-extra';
+import { existsSync } from 'fs';
+import { promises as fs } from 'fs';
 
 const DB_PATH = process.env.DATABASE_PATH || './novao.db';
 
@@ -156,7 +157,7 @@ async function seedInitialFeatures(db: Database) {
 }
 
 export async function getDb(): Promise<Database> {
-    const dbFileExists = await fs.pathExists(DB_PATH);
+    const dbFileExists = existsSync(DB_PATH);
 
     if (!dbFileExists && dbInstance) {
         console.log('Database file not found. Re-initializing connection.');

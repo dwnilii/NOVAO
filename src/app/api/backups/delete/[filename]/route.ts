@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs-extra';
+import { promises as fs, existsSync } from 'fs';
 import path from 'path';
 
 const BACKUP_DIR = path.join(process.cwd(), 'backups');
@@ -7,7 +7,7 @@ const BACKUP_DIR = path.join(process.cwd(), 'backups');
 // Helper to ensure directory exists
 const ensureBackupDir = async () => {
   try {
-    await fs.ensureDir(BACKUP_DIR);
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
   } catch (error) {
     console.error('Failed to ensure backup directory exists:', error);
     throw new Error('Server configuration error for backups.');
@@ -30,12 +30,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { filename:
 
   try {
     // Check if file exists and is within the backup directory to prevent path traversal attacks
-    const fileExists = await fs.pathExists(filePath);
-    if (!fileExists || path.dirname(filePath) !== BACKUP_DIR) {
+    if (!existsSync(filePath) || path.dirname(filePath) !== BACKUP_DIR) {
       throw new Error('File not found or access denied.');
     }
 
-    await fs.remove(filePath);
+    await fs.rm(filePath);
 
     return NextResponse.json({ success: true, message: `Backup file '${filename}' deleted successfully.` }, { status: 200 });
   } catch (error: any) {

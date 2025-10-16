@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Zap, LogOut, Settings, Tags, Package, Bell, History, Server, Folder } from "lucide-react";
+import { LayoutDashboard, Users, Zap, LogOut, Settings, Tags, Package, Bell, History, Folder } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

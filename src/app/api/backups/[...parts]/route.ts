@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs-extra';
+import { promises as fs, existsSync } from 'fs';
 import path from 'path';
 import { stat, readdir } from 'fs/promises';
 
@@ -8,7 +8,7 @@ const BACKUP_DIR = path.join(process.cwd(), 'backups');
 // Helper to ensure directory exists
 const ensureBackupDir = async () => {
   try {
-    await fs.ensureDir(BACKUP_DIR);
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
   } catch (error) {
     console.error('Failed to ensure backup directory exists:', error);
     throw new Error('Server configuration error for backups.');

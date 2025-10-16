@@ -18,7 +18,7 @@ import { CheckoutDialog } from "@/components/checkout-dialog";
 import type { CartItem, Order, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { OrderHistoryDialog } from "@/components/order-history-dialog";
-import { getLiveUserData, addOrder } from "@/lib/api";
+import { addOrder } from "@/lib/api";
 import { LanguageContext } from "@/context/language-context";
 import { translations } from "@/lib/translations";
 
@@ -29,9 +29,6 @@ export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }
   const { toast } = useToast();
   const { language } = useContext(LanguageContext);
   const t = translations[language];
-
-  const [liveData, setLiveData] = useState<Partial<User> | null>(null);
-  const [isDataLoading, setIsDataLoading] = useState(true);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -48,36 +45,6 @@ export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }
       router.push("/user-login");
     }
   }, [authUser, authLoading, router]);
-  
-  useEffect(() => {
-    if (authUser?.uuid) {
-      setIsDataLoading(true);
-      getLiveUserData(authUser.uuid)
-        .then(userData => {
-          if (userData) {
-            setLiveData(userData);
-          } else {
-             toast({
-              title: t.toast.couldNotFetchLiveData.title,
-              description: t.toast.couldNotFetchLiveData.description,
-              variant: "destructive",
-            });
-          }
-        })
-        .catch(err => {
-            console.error("Error fetching live data:", err);
-            toast({ title: "Error", description: "Could not load live user data.", variant: "destructive" });
-        })
-        .finally(() => setIsDataLoading(false));
-    } else if (authUser) {
-        setIsDataLoading(false);
-         toast({
-          title: t.toast.missingConfig.title,
-          description: t.toast.missingConfig.description,
-          variant: "destructive",
-        });
-    }
-  }, [authUser, toast, t]);
 
   const handleAddToCart = (item: CartItem) => {
     // For plans, only one can be bought for self
@@ -130,16 +97,8 @@ export default function UserDashboardPage({ orders, setOrders, isOrdersLoading }
     }
   };
 
-  const isLoading = authLoading || isDataLoading || isOrdersLoading;
-  const user = useMemo(() => {
-    if (!authUser) return null;
-    const baseUser = { ...authUser };
-    if (liveData) {
-      return { ...baseUser, ...liveData };
-    }
-    return baseUser;
-  }, [authUser, liveData]) as User | null;
-
+  const isLoading = authLoading || isOrdersLoading;
+  const user = authUser as User | null;
 
   if (isLoading || !user) {
     return (

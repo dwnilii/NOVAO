@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, readdir, stat } from 'fs/promises';
 import { join } from 'path';
-import fs from 'fs-extra';
+import { promises as fs } from 'fs';
+
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
 
 // GET all uploaded files
 export async function GET(req: NextRequest) {
-  await fs.ensureDir(UPLOAD_DIR);
+  await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
   try {
     const filenames = await readdir(UPLOAD_DIR);
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Ensure the uploads directory exists
-  await fs.ensureDir(UPLOAD_DIR);
+  await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -66,12 +67,12 @@ export async function POST(req: NextRequest) {
 
 // DELETE all uploaded files
 export async function DELETE(req: NextRequest) {
-    await fs.ensureDir(UPLOAD_DIR);
+    await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
     try {
         const files = await readdir(UPLOAD_DIR);
         for (const file of files) {
-            await fs.remove(join(UPLOAD_DIR, file));
+            await fs.rm(join(UPLOAD_DIR, file));
         }
         return NextResponse.json({ success: true, message: 'All uploaded files have been deleted.' }, { status: 200 });
     } catch (error: any) {

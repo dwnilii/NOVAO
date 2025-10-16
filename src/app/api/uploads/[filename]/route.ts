@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs-extra';
+import { promises as fs, existsSync } from 'fs';
 import path from 'path';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
@@ -14,7 +14,7 @@ function sanitizeFilename(filename: string): string | null {
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { filename: string } }) {
-    await fs.ensureDir(UPLOAD_DIR);
+    await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
     const filename = sanitizeFilename(params.filename);
 
@@ -25,12 +25,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { filename:
     const filePath = path.join(UPLOAD_DIR, filename);
 
     try {
-        const fileExists = await fs.pathExists(filePath);
-        if (!fileExists) {
+        if (!existsSync(filePath)) {
             return NextResponse.json({ message: 'File not found.' }, { status: 404 });
         }
 
-        await fs.remove(filePath);
+        await fs.rm(filePath);
 
         return NextResponse.json({ success: true, message: `File '${filename}' deleted successfully.` }, { status: 200 });
     } catch (error: any) {
