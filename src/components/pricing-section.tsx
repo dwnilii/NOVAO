@@ -5,27 +5,28 @@ import { getPricingPlans } from '@/lib/api';
 import type { PricingPlan } from '@/lib/types';
 import { Skeleton } from './ui/skeleton';
 import { PricingCard } from './pricing-card';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 function PricingCardSkeleton() {
     return (
-        <div className="w-full max-w-sm">
-            <Card className="flex flex-col rounded-xl overflow-hidden h-full">
-                <CardHeader className="items-center text-center pt-8">
-                    <Skeleton className="h-8 w-24 mb-2" />
-                    <Skeleton className="h-12 w-32 mb-1" />
-                    <Skeleton className="h-4 w-20" />
-                </CardHeader>
-                <CardContent className="flex-1 px-8 space-y-2">
-                    {[...Array(3)].map((_, i) => (
-                       <Skeleton key={i} className="h-5 w-full" />
-                    ))}
-                </CardContent>
-                <CardFooter className="p-6 pt-2">
-                    <Skeleton className="h-11 w-full" />
-                </CardFooter>
-            </Card>
-        </div>
+        <Card className="w-full max-w-sm shrink-0 h-[450px]">
+            <div className="flex flex-col justify-between h-full p-6">
+                 <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <Skeleton className="h-8 w-24" />
+                        <Skeleton className="h-6 w-6 rounded-full" />
+                    </div>
+                    <Skeleton className="h-12 w-32" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-3">
+                     <Skeleton className="h-5 w-3/4" />
+                     <Skeleton className="h-5 w-1/2" />
+                </div>
+                <Skeleton className="h-12 w-full" />
+            </div>
+        </Card>
     )
 }
 
@@ -38,7 +39,6 @@ export function PricingSection() {
       setIsLoading(true);
       try {
         const fetchedPlans = await getPricingPlans();
-        // **Robust Filtering:** Ensure only valid, visible objects are processed.
         const cleanPlans = (Array.isArray(fetchedPlans) ? fetchedPlans : [])
             .filter(p => p && typeof p === 'object' && p.showOnLanding);
         setPlans(cleanPlans);
@@ -61,7 +61,7 @@ export function PricingSection() {
                         Choose a plan that works for you.
                     </p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-8">
+                 <div className="flex justify-center gap-8">
                    <PricingCardSkeleton />
                    <PricingCardSkeleton />
                    <PricingCardSkeleton />
@@ -72,23 +72,35 @@ export function PricingSection() {
   }
 
   if (plans.length === 0) {
-    return null; // Don't render the section if there are no plans to show
+    return null; 
   }
 
   return (
     <section id="pricing" className="py-20">
       <div className="container mx-auto px-4">
-        <div className="mb-12 text-center">
+        <div className="mb-16 text-center">
           <h2 className="text-4xl font-bold">Flexible Plans</h2>
           <p className="mt-2 text-lg text-muted-foreground">
             Choose a plan that works for you.
           </p>
         </div>
-        <div className="flex flex-wrap justify-center gap-8">
-          {plans.map((plan) => (
-            <PricingCard key={`plan-${plan.id}`} plan={plan} />
-          ))}
-        </div>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-6xl mx-auto"
+        >
+          <CarouselContent>
+            {plans.map((plan) => (
+              <CarouselItem key={`plan-${plan.id}`} className="md:basis-1/2 lg:basis-1/3 flex justify-center">
+                <PricingCard plan={plan} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </section>
   );
