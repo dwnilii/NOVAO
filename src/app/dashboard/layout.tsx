@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { LanguageToggle } from "@/components/language-toggle";
 import { LanguageProvider } from "@/context/language-context";
-import { NotificationBell } from "@/components/notification-bell";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -34,7 +33,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
 
             <div className="flex items-center gap-2">
-               <NotificationBell />
                <LanguageToggle />
               <Button 
                 variant="destructive" 
