@@ -57,15 +57,43 @@ export function FontSettings() {
       await updateSetting('current_persian_font', currentPersianFont);
       await updateSetting('current_english_font', currentEnglishFont);
 
-      // Update CSS variables
-      document.documentElement.style.setProperty(
-        '--font-persian-path',
-        currentPersianFont ? `url('${currentPersianFont}')` : null
-      );
-      document.documentElement.style.setProperty(
-        '--font-english-path',
-        currentEnglishFont ? `url('${currentEnglishFont}')` : null
-      );
+      // Create and append new style element for dynamic font loading
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        @font-face {
+          font-family: 'CustomPersianFont';
+          src: url('${currentPersianFont}') format('woff2'),
+               url('${currentPersianFont}') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'CustomEnglishFont';
+          src: url('${currentEnglishFont}') format('woff2'),
+               url('${currentEnglishFont}') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+      `;
+
+      // Remove any previous dynamic font styles
+      const oldStyle = document.getElementById('dynamic-fonts');
+      if (oldStyle) {
+        oldStyle.remove();
+      }
+
+      // Add the new style element
+      styleElement.id = 'dynamic-fonts';
+      document.head.appendChild(styleElement);
+
+      // Force font reload
+      document.body.style.fontFamily = 'CustomPersianFont, CustomEnglishFont, system-ui';
+      document.body.style.opacity = '0.99';
+      setTimeout(() => {
+        document.body.style.opacity = '1';
+      }, 100);
 
       toast({
         title: "Success",

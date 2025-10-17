@@ -1,8 +1,8 @@
-/* Font loading for Persian and English fonts */
+/* Base font loading for Persian and English fonts */
 @font-face {
   font-family: 'CustomPersianFont';
-  src: var(--font-persian-path, url('/fonts/persian_default.woff2')) format('woff2'),
-       var(--font-persian-path, url('/fonts/persian_default.ttf')) format('truetype');
+  src: url('/fonts/persian_default.woff2') format('woff2'),
+       url('/fonts/persian_default.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -10,8 +10,8 @@
 
 @font-face {
   font-family: 'CustomEnglishFont';
-  src: var(--font-english-path, url('/fonts/english_default.woff2')) format('woff2'),
-       var(--font-english-path, url('/fonts/english_default.ttf')) format('truetype');
+  src: url('/fonts/english_default.woff2') format('woff2'),
+       url('/fonts/english_default.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -19,15 +19,11 @@
 
 /* Font application based on language */
 [lang="fa"] {
-  font-family: 'CustomPersianFont', system-ui, -apple-system, sans-serif;
+  font-family: 'CustomPersianFont', var(--font-noto-sans-arabic), system-ui, -apple-system, sans-serif;
 }
 
 [lang="en"] {
-  font-family: 'CustomEnglishFont', system-ui, -apple-system, sans-serif;
+  font-family: 'CustomEnglishFont', var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
-/* Font variables will be updated via JavaScript when fonts are changed */
-:root {
-  --font-persian-path: url('/fonts/persian_default.woff2');
-  --font-english-path: url('/fonts/english_default.woff2');
-}
+/* Dynamic fonts will be injected via JavaScript */
