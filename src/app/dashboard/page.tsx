@@ -187,7 +187,16 @@ export default function UserDashboardPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="font-medium text-muted-foreground">{t.subscriptionStatus.status}</p>
-                  <Badge variant={user.subscription === 'active' ? 'default' : 'destructive'} className="text-base capitalize">
+                  <Badge 
+                    variant={
+                        user.subscription === 'active' 
+                        ? 'default' 
+                        : user.subscription === 'expired' 
+                        ? 'destructive' 
+                        : 'secondary'
+                    } 
+                    className="text-base capitalize"
+                  >
                      {t.subscriptionStatus[user.subscription]}
                   </Badge>
                 </div>
