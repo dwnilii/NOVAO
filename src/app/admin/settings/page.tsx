@@ -155,11 +155,10 @@ export default function AdminSettingsPage() {
       <h1 className="text-3xl font-bold">Site & Landing Page Settings</h1>
       
       <Tabs defaultValue="general">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="landing-page">Landing Page</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="telegram">Telegram</TabsTrigger>
           <TabsTrigger value="clients">Clients</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="mt-6">
@@ -186,8 +185,8 @@ export default function AdminSettingsPage() {
                            <SiteLogo className="text-primary-foreground" iconClassName="h-6 w-6 text-muted-foreground" width={28} height={28}/>
                         </div>
                          {logoPreview && (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted">
-                                <Image src={logoPreview} alt="New Logo Preview" width={28} height={28} />
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted p-1">
+                                <Image src={logoPreview} alt="New Logo Preview" width={40} height={40} className="object-contain w-full h-full" />
                             </div>
                         )}
                         <input type="file" ref={logoInputRef} onChange={handleLogoUpload} className="hidden" accept="image/svg+xml, image/png, image/jpeg" />
