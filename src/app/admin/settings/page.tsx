@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Upload, Loader2, Save, Zap } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { LandingPageSettings } from "@/components/landing-page-settings";
@@ -15,19 +15,14 @@ import { PaymentSettings } from "@/components/payment-settings";
 import { FeaturesSettings } from "@/components/features-settings";
 import { ClientLinksSettings } from "@/components/client-links-settings";
 import { getSetting, updateSetting } from "@/lib/api";
-import Image from "next/image";
-import { SiteLogo } from "@/components/site-logo";
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
-  // State for Branding
+  // State for General Settings (e.g. Site Name)
   const [siteName, setSiteName] = useState("Novao");
-  const [isBrandingSaving, setIsBrandingSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [isGeneralSaving, setIsGeneralSaving] = useState(false);
 
   // State for Hero Section
   const [heroTitle, setHeroTitle] = useState('');
@@ -64,67 +59,22 @@ export default function AdminSettingsPage() {
   }, [toast]);
 
 
-  const handleBrandingSave = async () => {
-    setIsBrandingSaving(true);
+  const handleGeneralSave = async () => {
+    setIsGeneralSaving(true);
     try {
       await updateSetting('siteName', siteName);
       toast({
-        title: "Branding Saved",
+        title: "Settings Saved",
         description: "Your new site name has been saved.",
       });
     } catch(e) {
        toast({
-        title: "Error Saving Branding",
+        title: "Error Saving Settings",
         description: "Could not save the site name.",
         variant: "destructive",
       });
     } finally {
-      setIsBrandingSaving(false);
-    }
-  };
-  
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!['image/svg+xml', 'image/png', 'image/jpeg'].includes(file.type)) {
-        toast({ title: "Invalid File Type", description: "Please upload an SVG, PNG, or JPG file.", variant: "destructive" });
-        return;
-    }
-
-    setLogoPreview(URL.createObjectURL(file));
-    setIsUploading(true);
-
-    try {
-        const formData = new FormData();
-        formData.append('logo', file);
-        
-        const response = await fetch('/api/logo', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "Failed to upload logo.");
-        }
-        
-        toast({
-            title: "Logo Uploaded Successfully",
-            description: "Your new logo has been saved. Please refresh to see changes across the site.",
-        });
-    } catch(e: any) {
-        toast({
-            title: "Error Uploading Logo",
-            description: e.message || "Could not upload the new logo.",
-            variant: "destructive",
-        });
-        setLogoPreview(null);
-    } finally {
-        setIsUploading(false);
-        if (logoInputRef.current) {
-            logoInputRef.current.value = "";
-        }
+      setIsGeneralSaving(false);
     }
   };
 
@@ -166,8 +116,8 @@ export default function AdminSettingsPage() {
         <TabsContent value="general" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Branding</CardTitle>
-                <CardDescription>Manage your site's name and logo.</CardDescription>
+                <CardTitle>General Settings</CardTitle>
+                <CardDescription>Manage your site's public-facing name.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {isLoading ? <Loader2 className="animate-spin" /> : (
@@ -180,27 +130,9 @@ export default function AdminSettingsPage() {
                         onChange={(e) => setSiteName(e.target.value)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Current Logo</Label>
-                      <div className="flex items-center gap-6">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted p-1">
-                          {logoPreview ? (
-                            <Image src={logoPreview} alt="New Logo Preview" width={40} height={40} className="object-contain w-full h-full" />
-                          ) : (
-                            <SiteLogo className="text-primary-foreground" iconClassName="h-6 w-6 text-muted-foreground" width={28} height={28}/>
-                          )}
-                        </div>
-                        <input type="file" ref={logoInputRef} onChange={handleLogoUpload} className="hidden" accept="image/svg+xml, image/png, image/jpeg" />
-                        <Button variant="outline" onClick={() => logoInputRef.current?.click()} disabled={isUploading}>
-                          {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                          Change Logo
-                        </Button>
-                      </div>
-                       <p className="text-xs text-muted-foreground pt-1">Upload an SVG, PNG, or JPG file. Recommended size: 64x64 pixels.</p>
-                    </div>
-                    <Button onClick={handleBrandingSave} disabled={isBrandingSaving}>
-                      {isBrandingSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
-                      Save Branding
+                    <Button onClick={handleGeneralSave} disabled={isGeneralSaving}>
+                      {isGeneralSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
+                      Save Settings
                     </Button>
                   </>
                 )}

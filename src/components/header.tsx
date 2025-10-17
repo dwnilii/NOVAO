@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SiteLogo } from "./site-logo";
+import { Zap } from "lucide-react";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/25 backdrop-blur-xl backdrop-saturate-125">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <SiteLogo className="text-primary" iconClassName="h-6 w-6 text-primary" />
+          <Zap className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold">Novao</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm md:flex">

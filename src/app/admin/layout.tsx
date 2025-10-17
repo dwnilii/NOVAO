@@ -18,7 +18,6 @@ import { LayoutDashboard, Users, Zap, LogOut, Settings, Tags, Package, Bell, His
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { SiteLogo } from "@/components/site-logo";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -49,7 +48,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Sidebar className="bg-sidebar/25 backdrop-blur-xl backdrop-saturate-125">
         <SidebarHeader className="p-4">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
-             <SiteLogo width={28} height={28} iconClassName="h-7 w-7" />
+             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Zap className="h-5 w-5" />
+            </div>
             <h2 className="text-xl font-semibold tracking-tighter group-data-[collapsible=icon]:hidden">
               Novao
             </h2>
