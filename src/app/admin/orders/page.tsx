@@ -231,14 +231,45 @@ export default function AdminOrdersPage() {
                             </CardContent>
                         </Card>
                         <Card>
-                            <CardHeader><CardTitle className="text-lg">Payment Proof</CardTitle></CardHeader>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Payment Proof</CardTitle>
+                                <CardDescription>
+                                    {selectedOrder.paymentType === 'receipt' ? 'Image receipt' : 'Text proof'}
+                                </CardDescription>
+                            </CardHeader>
                             <CardContent>
-                                {selectedOrder.paymentProof && selectedOrder.paymentType === 'receipt' && (isImageDataUrl(selectedOrder.paymentProof) || isUploadedFilePath(selectedOrder.paymentProof)) ? (
-                                    <Image src={selectedOrder.paymentProof} alt="Payment Receipt" width={400} height={400} className="rounded-md border object-contain" />
+                                {selectedOrder.paymentProof && selectedOrder.paymentType === 'receipt' ? (
+                                    <div className="space-y-4">
+                                        <div className="relative aspect-[4/3] w-full border rounded-lg overflow-hidden">
+                                            <Image 
+                                                src={selectedOrder.paymentProof} 
+                                                alt="Payment Receipt" 
+                                                fill
+                                                className="object-contain"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm"
+                                                onClick={() => window.open(selectedOrder.paymentProof, '_blank')}
+                                            >
+                                                View Full Size
+                                            </Button>
+                                        </div>
+                                    </div>
                                 ) : selectedOrder.paymentType === 'text' && selectedOrder.paymentProof ? (
-                                    <pre className="p-4 bg-muted rounded-md text-sm text-muted-foreground whitespace-pre-wrap font-mono">{selectedOrder.paymentProof}</pre>
+                                    <div className="space-y-2">
+                                        <pre className="p-4 bg-muted rounded-md text-sm text-muted-foreground whitespace-pre-wrap font-mono overflow-x-auto">
+                                            {selectedOrder.paymentProof}
+                                        </pre>
+                                    </div>
                                 ) : (
-                                    <p className="text-muted-foreground">No payment proof submitted for this order.</p>
+                                    <div className="py-8 text-center">
+                                        <p className="text-muted-foreground">No payment proof submitted for this order.</p>
+                                    </div>
+                                )
                                 )}
                             </CardContent>
                         </Card>

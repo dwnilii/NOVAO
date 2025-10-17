@@ -54,31 +54,67 @@ export function CheckoutDialog({ isOpen, onOpenChange, cart, user, onOrderSubmit
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setReceiptPreview(URL.createObjectURL(file)); // Show local preview immediately
-      setIsUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
+    if (!file) return;
 
-        if (!response.ok) {
-          throw new Error('Upload failed');
-        }
-
-        const { url } = await response.json();
-        setPaymentProof(url); // Set the returned URL for submission
-        toast({ title: "Upload Successful", description: "Receipt image is ready." });
-      } catch (error) {
-        toast({ title: "Upload Failed", description: "Could not upload the receipt. Please try again.", variant: 'destructive' });
-        setReceiptPreview(''); // Clear preview on failure
-      } finally {
-        setIsUploading(false);
-      }
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ 
+        title: "Invalid File Type", 
+        description: "Please upload a JPG, PNG, or GIF image.", 
+        variant: 'destructive' 
+      });
+      return;
     }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({ 
+        title: "File Too Large", 
+        description: "Please upload an image smaller than 5MB.", 
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    setReceiptPreview(URL.createObjectURL(file));
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Upload failed');
+      }
+
+      setPaymentProof(data.url);
+      toast({ 
+        title: "Upload Successful", 
+        description: "Receipt image has been uploaded successfully." 
+      });
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not upload the receipt. Please try again.";
+      toast({ 
+        title: "Upload Failed", 
+        description: message, 
+        variant: 'destructive' 
+      });
+      setReceiptPreview('');
+      setPaymentProof('');
+    } finally {
+      setIsUploading(false);
+    }
+  }
   };
 
   const triggerFileSelect = () => fileInputRef.current?.click();
