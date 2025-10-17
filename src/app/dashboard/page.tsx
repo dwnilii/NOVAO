@@ -18,9 +18,17 @@ import { CheckoutDialog } from "@/components/checkout-dialog";
 import type { CartItem, Order, User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { OrderHistoryDialog } from "@/components/order-history-dialog";
-import { addOrder, getOrdersByUserId } from "@/lib/api";
+import { ClientDownloadLinks } from "@/components/client-download-links";
+import { addOrder, getOrdersByUserId, getSetting } from "@/lib/api";
 import { LanguageContext } from "@/context/language-context";
 import { translations } from "@/lib/translations";
+
+type ClientLinks = {
+  android: string | null;
+  windows: string | null;
+  ios: string | null;
+  macos: string | null;
+};
 
 export default function UserDashboardPage() {
   const { user: authUser, loading: authLoading } = useAuth();
@@ -30,7 +38,8 @@ export default function UserDashboardPage() {
   const t = translations[language];
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isOrdersLoading, setIsOrdersLoading] = useState(true);
+  const [clientLinks, setClientLinks] = useState<ClientLinks>({ android: null, windows: null, ios: null, macos: null });
+  const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isStoreOpen, setIsStoreOpen] = useState(false);
@@ -38,14 +47,23 @@ export default function UserDashboardPage() {
 
   useEffect(() => {
     if (authUser?.id) {
-      setIsOrdersLoading(true);
-      getOrdersByUserId(authUser.id)
-        .then(setOrders)
-        .catch(err => {
-          console.error("Error fetching user orders:", err);
-          toast({ title: "Error", description: "Could not load order data.", variant: "destructive" });
+      setIsLoading(true);
+      Promise.all([
+        getOrdersByUserId(authUser.id),
+        getSetting('clientLink_android'),
+        getSetting('clientLink_windows'),
+        getSetting('clientLink_ios'),
+        getSetting('clientLink_macos'),
+      ])
+        .then(([userOrders, android, windows, ios, macos]) => {
+          setOrders(userOrders);
+          setClientLinks({ android, windows, ios, macos });
         })
-        .finally(() => setIsOrdersLoading(false));
+        .catch(err => {
+          console.error("Error fetching initial data:", err);
+          toast({ title: "Error", description: "Could not load dashboard data.", variant: "destructive" });
+        })
+        .finally(() => setIsLoading(false));
     }
   }, [authUser, toast]);
   
@@ -104,10 +122,10 @@ export default function UserDashboardPage() {
     }
   };
 
-  const isLoading = authLoading || isOrdersLoading;
+  const pageLoading = authLoading || isLoading;
   const user = authUser as User | null;
 
-  if (isLoading || !user) {
+  if (pageLoading || !user) {
     return (
         <div className="space-y-6 font-persian">
         <Skeleton className="h-9 w-64" />
@@ -128,10 +146,7 @@ export default function UserDashboardPage() {
             </Card>
             <Card>
                 <CardHeader> <Skeleton className="h-6 w-32" /> </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-3 w-full" />
-                    <div className="mt-3 flex justify-between text-sm"> <Skeleton className="h-4 w-24" /> <Skeleton className="h-4 w-24" /> </div>
-                </CardContent>
+                <CardContent> <Skeleton className="h-10 w-full" /> </CardContent>
             </Card>
             </div>
              <div className="lg:col-span-1">
@@ -149,7 +164,6 @@ export default function UserDashboardPage() {
   }
   
   const subscriptionLink = user.sublink || "No subscription link available.";
-  const usagePercentage = user.total > 0 ? (user.usage / user.total) * 100 : 0;
   
   return (
     <>
@@ -227,22 +241,8 @@ export default function UserDashboardPage() {
               </CardFooter>
             </Card>
             
-            <Card>
-              <CardHeader>
-              <CardTitle>{t.dataUsage.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-              <Progress value={usagePercentage} className="h-3" />
-              <div className="mt-3 flex justify-between text-sm">
-                  <div className="text-muted-foreground">
-                      <span className="font-bold text-foreground">{user.usage}GB</span> {t.dataUsage.used}
-                  </div>
-                  <div className="text-muted-foreground">
-                      <span className="font-bold text-foreground">{user.total}GB</span> {t.dataUsage.total}
-                  </div>
-              </div>
-              </CardContent>
-            </Card>
+            <ClientDownloadLinks links={clientLinks} />
+
           </div>
 
           <div className="lg:col-span-1">
