@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Loader2, Trash2 } from 'lucide-react';
+import { Upload, Loader2, Trash2, Save } from 'lucide-react';
 import { getSetting, updateSetting } from '@/lib/api';
 import {
   Table,
@@ -25,13 +25,62 @@ interface FontFile {
 
 export function FontSettings() {
   const [isUploading, setIsUploading] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
   const [currentFonts, setCurrentFonts] = useState<FontFile[]>([]);
+  const [currentPersianFont, setCurrentPersianFont] = useState('');
+  const [currentEnglishFont, setCurrentEnglishFont] = useState('');
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadCurrentFonts();
+    loadCurrentSettings();
   }, []);
+
+  const loadCurrentSettings = async () => {
+    try {
+      const persianFont = await getSetting('current_persian_font');
+      const englishFont = await getSetting('current_english_font');
+      
+      setCurrentPersianFont(persianFont || '');
+      setCurrentEnglishFont(englishFont || '');
+    } catch (error) {
+      console.error('Failed to load font settings:', error);
+    }
+  };
+
+  const handleApplyFonts = async () => {
+    try {
+      setIsApplying(true);
+      
+      // Update settings in database
+      await updateSetting('current_persian_font', currentPersianFont);
+      await updateSetting('current_english_font', currentEnglishFont);
+
+      // Update CSS variables
+      document.documentElement.style.setProperty(
+        '--font-persian-path',
+        currentPersianFont ? `url('${currentPersianFont}')` : null
+      );
+      document.documentElement.style.setProperty(
+        '--font-english-path',
+        currentEnglishFont ? `url('${currentEnglishFont}')` : null
+      );
+
+      toast({
+        title: "Success",
+        description: "Fonts have been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to apply font settings.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   const loadCurrentFonts = async () => {
     try {
@@ -171,36 +220,103 @@ export function FontSettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          {/* Persian Fonts Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="persian-font-upload">Upload Persian Font</Label>
-            <div className="grid w-full items-center gap-4">
-              <Input
-                id="persian-font-upload"
-                type="file"
-                accept=".ttf,.woff2"
-                onChange={(e) => handleFontUpload(e, 'persian')}
-                disabled={isUploading}
-              />
+          {/* Persian Fonts Upload and Selection */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="persian-font-select">Current Persian Font</Label>
+              <select
+                id="persian-font-select"
+                className="w-full rounded-md border bg-background px-3 py-2"
+                value={currentPersianFont}
+                onChange={(e) => setCurrentPersianFont(e.target.value)}
+              >
+                <option value="">Default System Font</option>
+                {currentFonts
+                  .filter(f => f.type === 'persian')
+                  .map(font => (
+                    <option key={font.path} value={font.path}>{font.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="persian-font-upload">Upload Persian Font</Label>
+              <div className="grid w-full items-center gap-4">
+                <Input
+                  id="persian-font-upload"
+                  type="file"
+                  accept=".ttf,.woff2"
+                  onChange={(e) => handleFontUpload(e, 'persian')}
+                  disabled={isUploading}
+                />
+              </div>
             </div>
           </div>
 
-          {/* English Fonts Upload */}
-          <div className="space-y-2">
-            <Label htmlFor="english-font-upload">Upload English Font</Label>
-            <div className="grid w-full items-center gap-4">
-              <Input
-                id="english-font-upload"
-                type="file"
-                accept=".ttf,.woff2"
-                onChange={(e) => handleFontUpload(e, 'english')}
-                disabled={isUploading}
-              />
+          {/* English Fonts Upload and Selection */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="english-font-select">Current English Font</Label>
+              <select
+                id="english-font-select"
+                className="w-full rounded-md border bg-background px-3 py-2"
+                value={currentEnglishFont}
+                onChange={(e) => setCurrentEnglishFont(e.target.value)}
+              >
+                <option value="">Default System Font</option>
+                {currentFonts
+                  .filter(f => f.type === 'english')
+                  .map(font => (
+                    <option key={font.path} value={font.path}>{font.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="english-font-upload">Upload English Font</Label>
+              <div className="grid w-full items-center gap-4">
+                <Input
+                  id="english-font-upload"
+                  type="file"
+                  accept=".ttf,.woff2"
+                  onChange={(e) => handleFontUpload(e, 'english')}
+                  disabled={isUploading}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
+        <div className="flex justify-end space-x-4 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setCurrentPersianFont('');
+              setCurrentEnglishFont('');
+            }}
+            disabled={!currentPersianFont && !currentEnglishFont}
+          >
+            Reset to Default
+          </Button>
+          <Button
+            onClick={handleApplyFonts}
+            disabled={isApplying}
+          >
+            {isApplying ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Applying...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Apply Fonts
+              </>
+            )}
+          </Button>
+        </div>
+
+        <p className="text-sm text-muted-foreground mt-4">
           Accepted formats: TTF, WOFF2 - Max size: 5MB
         </p>
 

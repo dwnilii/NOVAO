@@ -1,16 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Upload } from 'lucide-react';
+import { Upload, Save, Loader2 } from 'lucide-react';
+import { getSetting, updateSetting } from '@/lib/api';
 
 export function LogoSettings() {
   const [isUploading, setIsUploading] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [selectedLogo, setSelectedLogo] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadCurrentLogo();
+  }, []);
+
+  const loadCurrentLogo = async () => {
+    try {
+      const currentLogo = await getSetting('current_logo');
+      if (currentLogo) {
+        setPreviewUrl(currentLogo);
+      }
+    } catch (error) {
+      console.error('Failed to load current logo:', error);
+    }
+  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,19 +57,11 @@ export function LogoSettings() {
 
     try {
       setIsUploading(true);
-      const formData = new FormData();
-      formData.append('logo', file);
-
-      const response = await fetch('/api/logo/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) throw new Error('Error uploading file');
-
+      setSelectedLogo(file);
+      setPreviewUrl(URL.createObjectURL(file));
       toast({
         title: "Success",
-        description: "Logo has been updated successfully.",
+        description: "Logo has been selected. Click Apply to save changes.",
       });
     } catch (error) {
       toast({
@@ -60,6 +71,42 @@ export function LogoSettings() {
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleApplyLogo = async () => {
+    if (!selectedLogo) return;
+
+    try {
+      setIsApplying(true);
+      const formData = new FormData();
+      formData.append('logo', selectedLogo);
+
+      const response = await fetch('/api/logo/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Error uploading file');
+
+      const { path } = await response.json();
+      await updateSetting('current_logo', path);
+
+      toast({
+        title: "Success",
+        description: "Logo has been updated and applied successfully.",
+      });
+
+      // Reset selection state
+      setSelectedLogo(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to apply logo changes.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsApplying(false);
     }
   };
 
@@ -85,8 +132,49 @@ export function LogoSettings() {
             Accepted formats: PNG, JPG, SVG - Max size: 2MB
           </p>
         </div>
+
+        {/* Logo Preview */}
+        {previewUrl && (
+          <div className="mt-4">
+            <Label>Logo Preview</Label>
+            <div className="mt-2 p-4 border rounded-lg">
+              <img src={previewUrl} alt="Logo Preview" className="h-12 w-auto" />
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-4 pt-4 border-t mt-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSelectedLogo(null);
+              setPreviewUrl('');
+              loadCurrentLogo();
+            }}
+            disabled={!selectedLogo}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleApplyLogo}
+            disabled={!selectedLogo || isApplying}
+          >
+            {isApplying ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Applying...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Apply Logo
+              </>
+            )}
+          </Button>
+        </div>
         
-        <div className="space-y-2">
+        <div className="space-y-2 mt-4">
           <Label>Logo Storage Path</Label>
           <p className="text-sm text-muted-foreground">
             The logo will be stored at:
