@@ -9,7 +9,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/25 backdrop-blur-xl backdrop-saturate-125">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <Zap className="h-6 w-6 text-primary" />
+          <img src="/logo.svg" alt="Novao" className="h-8 w-auto" />
           <span className="text-xl font-bold">Novao</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm md:flex">

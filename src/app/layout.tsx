@@ -11,6 +11,11 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Novao',
   description: 'Novao - A Secure, Fast, and Reliable Private Service',
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 const inter = Inter({

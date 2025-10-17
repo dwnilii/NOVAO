@@ -15,6 +15,7 @@ import { PaymentSettings } from "@/components/payment-settings";
 import { FeaturesSettings } from "@/components/features-settings";
 import { ClientLinksSettings } from "@/components/client-links-settings";
 import { getSetting, updateSetting } from "@/lib/api";
+import { LogoSettings } from "@/components/logo-settings";
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
@@ -114,7 +115,8 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="clients">Clients</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="mt-6">
-            <Card>
+            <LogoSettings />
+            <Card className="mt-6">
               <CardHeader>
                 <CardTitle>General Settings</CardTitle>
                 <CardDescription>Manage your site's public-facing name.</CardDescription>
