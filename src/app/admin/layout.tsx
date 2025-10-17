@@ -49,9 +49,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Sidebar className="bg-sidebar/25 backdrop-blur-xl backdrop-saturate-125">
         <SidebarHeader className="p-4">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-               <SiteLogo width={20} height={20} iconClassName="h-5 w-5" />
-            </div>
+             <SiteLogo width={28} height={28} iconClassName="h-7 w-7" />
             <h2 className="text-xl font-semibold tracking-tighter group-data-[collapsible=icon]:hidden">
               Novao
             </h2>
