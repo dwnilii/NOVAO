@@ -8,6 +8,7 @@ import sqlite3 from 'sqlite3';
 import { open, type Database } from 'sqlite';
 import { existsSync } from 'fs';
 import { promises as fs } from 'fs';
+import { updateSchema } from './db/schema';
 
 const DB_PATH = process.env.DATABASE_PATH || './novao.db';
 
@@ -20,6 +21,9 @@ async function initializeDb(): Promise<Database> {
   });
 
   console.log('Connected to the SQLite database.');
+
+  // Update schema with new tables and migrations
+  await updateSchema(db);
 
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (

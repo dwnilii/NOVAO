@@ -16,6 +16,7 @@ import { FeaturesSettings } from "@/components/features-settings";
 import { ClientLinksSettings } from "@/components/client-links-settings";
 import { getSetting, updateSetting } from "@/lib/api";
 import { LogoSettings } from "@/components/logo-settings";
+import { FontSettings } from "@/components/font-settings";
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
@@ -107,8 +108,9 @@ export default function AdminSettingsPage() {
       <h1 className="text-3xl font-bold">Site & Landing Page Settings</h1>
       
       <Tabs defaultValue="general">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="fonts">Fonts</TabsTrigger>
           <TabsTrigger value="landing-page">Landing Page</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="telegram">Telegram</TabsTrigger>
@@ -140,6 +142,9 @@ export default function AdminSettingsPage() {
                 )}
               </CardContent>
             </Card>
+        </TabsContent>
+        <TabsContent value="fonts" className="mt-6">
+          <FontSettings />
         </TabsContent>
         <TabsContent value="landing-page" className="mt-6">
           <div className="space-y-8">

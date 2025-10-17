@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Noto_Sans_Arabic } from 'next/font/google';
 import './globals.css';
+import './fonts.css';
 import { Toaster } from '@/components/ui/toaster';
 import { BackgroundBubbles } from '@/components/background-bubbles';
 import { AuthProvider } from '@/hooks/use-auth';
