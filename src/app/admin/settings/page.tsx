@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Upload, Loader2, Save } from "lucide-react";
+import { Upload, Loader2, Save, Zap } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { LandingPageSettings } from "@/components/landing-page-settings";
@@ -15,6 +15,8 @@ import { PaymentSettings } from "@/components/payment-settings";
 import { FeaturesSettings } from "@/components/features-settings";
 import { ClientLinksSettings } from "@/components/client-links-settings";
 import { getSetting, updateSetting } from "@/lib/api";
+import Image from "next/image";
+import { SiteLogo } from "@/components/site-logo";
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
@@ -23,6 +25,9 @@ export default function AdminSettingsPage() {
   // State for Branding
   const [siteName, setSiteName] = useState("Novao");
   const [isBrandingSaving, setIsBrandingSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // State for Hero Section
   const [heroTitle, setHeroTitle] = useState('');
@@ -78,12 +83,48 @@ export default function AdminSettingsPage() {
     }
   };
   
-  const handleLogoChange = () => {
-    // Simulate file upload
-     toast({
-      title: "Logo Uploaded",
-      description: "Your new logo has been uploaded successfully.",
-    });
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/svg+xml', 'image/png', 'image/jpeg'].includes(file.type)) {
+        toast({ title: "Invalid File Type", description: "Please upload an SVG, PNG, or JPG file.", variant: "destructive" });
+        return;
+    }
+
+    setLogoPreview(URL.createObjectURL(file));
+    setIsUploading(true);
+
+    try {
+        const formData = new FormData();
+        formData.append('logo', file);
+        const response = await fetch('/api/logo', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Failed to upload logo.");
+        }
+        
+        toast({
+            title: "Logo Uploaded Successfully",
+            description: "Your new logo has been saved. Please refresh to see changes across the site.",
+        });
+    } catch(e: any) {
+        toast({
+            title: "Error Uploading Logo",
+            description: e.message || "Could not upload the new logo.",
+            variant: "destructive",
+        });
+        setLogoPreview(null);
+    } finally {
+        setIsUploading(false);
+        if (logoInputRef.current) {
+            logoInputRef.current.value = "";
+        }
+    }
   };
 
   const handleHeroSave = async () => {
@@ -140,15 +181,22 @@ export default function AdminSettingsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Current Logo</Label>
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary-foreground"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                      <div className="flex items-center gap-6">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted">
+                           <SiteLogo className="text-primary-foreground" iconClassName="h-6 w-6 text-muted-foreground" width={28} height={28}/>
                         </div>
-                        <Button variant="outline" onClick={handleLogoChange}>
-                          <Upload className="mr-2 h-4 w-4" />
+                         {logoPreview && (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-muted">
+                                <Image src={logoPreview} alt="New Logo Preview" width={28} height={28} />
+                            </div>
+                        )}
+                        <input type="file" ref={logoInputRef} onChange={handleLogoUpload} className="hidden" accept="image/svg+xml, image/png, image/jpeg" />
+                        <Button variant="outline" onClick={() => logoInputRef.current?.click()} disabled={isUploading}>
+                          {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                           Change Logo
                         </Button>
                       </div>
+                       <p className="text-xs text-muted-foreground pt-1">Upload an SVG, PNG, or JPG file. Recommended size: 64x64 pixels.</p>
                     </div>
                     <Button onClick={handleBrandingSave} disabled={isBrandingSaving}>
                       {isBrandingSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}

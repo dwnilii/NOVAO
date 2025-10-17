@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { LanguageToggle } from "@/components/language-toggle";
 import { LanguageProvider } from "@/context/language-context";
+import { SiteLogo } from "@/components/site-logo";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -28,7 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href="/dashboard"
               className="flex items-center gap-2 font-semibold"
             >
-              <Zap className="h-6 w-6 text-primary" />
+              <SiteLogo className="text-primary" iconClassName="h-6 w-6 text-primary" />
               <span className="text-lg">Novao</span>
             </Link>
 
