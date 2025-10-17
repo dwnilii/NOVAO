@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useMemo, useContext } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { QrCodePlaceholder } from "@/components/qr-code";
+import QRCode from "react-qr-code";
 import { CopyButton } from "@/components/copy-button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
@@ -168,6 +167,8 @@ export default function UserDashboardPage() {
   const subscriptionLink = user.sublink || "No subscription link available.";
   const configLink = user.config || "No config available.";
   
+  const qrCodeValue = user.sublink || user.config || "";
+
   return (
     <>
       <div className="space-y-6 font-persian">
@@ -255,9 +256,20 @@ export default function UserDashboardPage() {
                       <CardDescription>{t.subLink.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-1 flex-col items-center justify-center gap-4">
-                      <div className="w-48 h-48 rounded-lg border bg-white p-2">
-                        <QrCodePlaceholder />
-                      </div>
+                      {qrCodeValue ? (
+                        <div className="w-48 h-48 rounded-lg border bg-white p-2">
+                           <QRCode
+                            size={256}
+                            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                            value={qrCodeValue}
+                            viewBox={`0 0 256 256`}
+                            />
+                        </div>
+                      ) : (
+                         <div className="w-48 h-48 rounded-lg border bg-muted flex items-center justify-center">
+                            <p className="text-sm text-muted-foreground text-center">No link available for QR code.</p>
+                         </div>
+                      )}
                   </CardContent>
                   <CardFooter className="flex-col justify-center gap-2">
                       {user.config ? (
