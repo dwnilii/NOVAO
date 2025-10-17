@@ -74,6 +74,11 @@ export default function UserDashboardPage() {
   }, [authUser, authLoading, router]);
 
   const handleAddToCart = (item: CartItem) => {
+      const cartItemId = `${item.productId}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      onAddToCart({ ...item, id: cartItemId });
+  };
+  
+  const onAddToCart = (item: CartItem) => {
     setCart(prevCart => [...prevCart, item]);
     toast({
         title: t.toast.addedToCart.title,
@@ -144,10 +149,7 @@ export default function UserDashboardPage() {
                     <Skeleton className="h-10 w-full sm:w-auto" />
                 </CardFooter>
             </Card>
-            <Card>
-                <CardHeader> <Skeleton className="h-6 w-32" /> </CardHeader>
-                <CardContent> <Skeleton className="h-10 w-full" /> </CardContent>
-            </Card>
+             <ClientDownloadLinks links={{android: '#', windows: '#', ios: '#', macos: '#'}} />
             </div>
              <div className="lg:col-span-1">
                 <Card className="flex flex-col h-full">
@@ -164,6 +166,7 @@ export default function UserDashboardPage() {
   }
   
   const subscriptionLink = user.sublink || "No subscription link available.";
+  const configLink = user.config || "No config available.";
   
   return (
     <>
@@ -256,12 +259,18 @@ export default function UserDashboardPage() {
                         <QrCodePlaceholder />
                       </div>
                   </CardContent>
-                  <CardFooter className="justify-center">
+                  <CardFooter className="flex-col justify-center gap-2">
+                      {user.config ? (
+                          <CopyButton textToCopy={configLink} toastMessage={"Config copied to clipboard."} className="w-full max-w-xs">
+                             Copy Config
+                          </CopyButton>
+                      ) : null}
                       {user.sublink ? (
                           <CopyButton textToCopy={subscriptionLink} toastMessage={t.toast.subLinkCopied} className="w-full max-w-xs">
                              {t.buttons.copySubLink}
                           </CopyButton>
-                      ) : (
+                      ) : null}
+                      {!user.config && !user.sublink && (
                           <Button disabled className="w-full max-w-xs">{t.buttons.noLinkAvailable}</Button>
                       )}
                   </CardFooter>
