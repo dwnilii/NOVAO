@@ -114,7 +114,7 @@ export function ManageSubscriptionForm({ user, onUserUpdate, open, onOpenChange 
     // If a new plan was selected, override total and planTitle
     if (selectedPlan) {
       // Safely parse the integer value from a string like "100 GB"
-      const planData = parseInt(selectedPlan.data.split(' ')[0], 10);
+      const planData = parseInt(selectedPlan.data.toString().split(' ')[0], 10);
       if (!isNaN(planData)) {
           updatedUser.total = planData;
       }
@@ -148,7 +148,7 @@ export function ManageSubscriptionForm({ user, onUserUpdate, open, onOpenChange 
               name="subscription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Panel Access</FormLabel>
+                  <FormLabel>Service Status (on Server)</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
