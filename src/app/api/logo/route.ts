@@ -24,20 +24,11 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save with a fixed name to be easily referenced, e.g., /logo.svg
-    const extension = file.name.split('.').pop();
-    const filename = `logo.${extension}`;
-    const path = join(PUBLIC_DIR, 'logo.svg'); // Always save as logo.svg for consistency
+    // Always save as logo.svg for consistency, assuming the uploaded file is SVG
+    // or can be treated as such by the browser if the content type is right.
+    // For simplicity, we'll stick to a single name.
+    const path = join(PUBLIC_DIR, 'logo.svg'); 
     
-     // Delete old logo files if they exist to prevent conflicts
-    const oldSvg = join(PUBLIC_DIR, 'logo.svg');
-    const oldPng = join(PUBLIC_DIR, 'logo.png');
-    const oldJpg = join(PUBLIC_DIR, 'logo.jpg');
-    
-    try { await fs.unlink(oldSvg); } catch (e) {}
-    try { await fs.unlink(oldPng); } catch (e) {}
-    try { await fs.unlink(oldJpg); } catch (e) {}
-
     await writeFile(path, buffer);
     console.log(`Logo uploaded to ${path}`);
     
