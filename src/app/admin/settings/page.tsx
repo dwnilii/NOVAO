@@ -12,7 +12,6 @@ import { LandingPageSettings } from "@/components/landing-page-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TelegramSettings } from "@/components/telegram-settings";
 import { PaymentSettings } from "@/components/payment-settings";
-import { ApiSettings } from "@/components/api-settings";
 import { FeaturesSettings } from "@/components/features-settings";
 import { getSetting, updateSetting } from "@/lib/api";
 
@@ -114,12 +113,11 @@ export default function AdminSettingsPage() {
       <h1 className="text-3xl font-bold">Site & Landing Page Settings</h1>
       
       <Tabs defaultValue="general">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="landing-page">Landing Page</TabsTrigger>
            <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="telegram">Telegram</TabsTrigger>
-          <TabsTrigger value="api">API</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="mt-6">
             <Card>
@@ -211,9 +209,6 @@ export default function AdminSettingsPage() {
         </TabsContent>
         <TabsContent value="telegram" className="mt-6">
             <TelegramSettings />
-        </TabsContent>
-        <TabsContent value="api" className="mt-6">
-          <ApiSettings />
         </TabsContent>
       </Tabs>
     </div>
